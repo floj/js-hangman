@@ -1,0 +1,17 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(1rem, 2vw, 4vw);
+    text-align: center;
+}
+
+#letterwall {
+    white-space: nowrap;
+}
+
+.won {
+    background-color: greenyellow;
+}
+
+.lost {
+    background-color: crimson;
+}
