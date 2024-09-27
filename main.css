@@ -1,17 +1,67 @@
 body {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: clamp(1rem, 2vw, 4vw);
-    text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  font-size: clamp(1rem, 2vw, 4vw);
+  text-align: center;
 }
 
 #letterwall {
-    white-space: nowrap;
+  white-space: nowrap;
+  font-weight: 900;
+  width: fit-content;
+  margin: auto;
+}
+
+.wrong {
+  animation: wrong 0.25s 1;
+}
+
+.correct {
+  animation: correct 0.25s 1;
 }
 
 .won {
-    background-color: greenyellow;
+  background-color: greenyellow;
 }
 
 .lost {
-    background-color: crimson;
+  background-color: crimson;
+}
+
+@keyframes wrong {
+  0% {
+    background-color: transparent;
+    color: inherit;
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    background-color: red;
+    color: white;
+    transform: rotate(0eg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    background-color: transparent;
+    color: inherit;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes correct {
+  0% {
+    color: inherit;
+    transform: scale(1);
+  }
+  50% {
+    color: green;
+    transform: scale(2);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+  }
 }

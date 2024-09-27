@@ -7,149 +7,163 @@ const announcmentElm = document.getElementById("announcment");
  * @returns ein zufällig ausgewähltes Wort
  */
 function randomWord() {
-  const words = ["Straßenlaterne", "Unterhaltung", "Clownsnase"];
+  const words = ["Kinderwurst", "Unterhaltung", "Clownsnase"];
   return words[Math.floor(Math.random() * words.length)];
 }
 
-/**
- * Legt ein neues Spiel an
- * @param {string} word Das zu erratende Word
- * @param {number} lives Die initiale Anzahl an Leben
- * @returns ein Spiel
- */
-function newGame(word, lives) {
-  return {
-    /** das gesuchte Wort */
-    secretWord: word,
-    /** bereits geratene Buchstaben */
-    guessedChars: [],
-    /** Anzahl an verbliebenen Leben */
-    lives: lives,
-    /** Zeigt an, ob das Spiel gewonnen ist */
-    won: false,
-    /** Zeigt an, ob das Spiel verloren ist */
-    lost: false,
-    /**
-     * Führt einen Spielzug aus und aktualisiert das Spiel
-     * @param {string} guess der Buchstabe, der ausprobiert werden soll
-     */
-    makeGuess(guess) {
-      // wenn das Spiel bereits vorbei ist, wird nichts gemacht
-      if (this.isOver()) {
-        return;
-      }
+let secretWord = "";
+let lives = 5;
+let won = false;
+let lost = false;
+let guessedChars = [];
 
-      // wir arbeiten mit Kleinbuchstaben, damit A==a
-      guess = guess.toLowerCase();
-
-      // Wenn der Buchtstabe bereits ausprobiert ist, passiert nichts
-      if (this.guessedChars.includes(guess)) {
-        return;
-      }
-
-      // Buchstabe zu den ausprobierten Buchchstaben hinzufügen
-      this.guessedChars.push(guess);
-
-      // Wenn damit das Wort erraten ist, ist das Spiel gewonnen
-      if (this.isFullyGuessed()) {
-        this.won = true;
-        return;
-      }
-
-      // Falls das Wort den Buchstaben nicht enthält, ein Leben abziehen
-      if (!this.secretWord.includes(guess)) {
-        this.lives--;
-      }
-
-      // Und wenn keine Leben mehr übrig sind: Verloren!
-      if (this.lives <= 0) {
-        this.lost = true;
-        return;
-      }
-    },
-    /**
-     * @returns true, wenn das Wort erraten ist, sonst false
-     */
-    isFullyGuessed() {
-      for (const c of this.secretWord.toLowerCase()) {
-        if (!this.guessedChars.includes(c)) {
-          return false;
-        }
-      }
-      return true;
-    },
-    /**
-     * @returns die anzuzeigende Buchstabenwand
-     */
-    letterWall() {
-      if (this.lost || this.won) {
-        return Array.from(this.secretWord).join(" ");
-      }
-      return Array.from(this.secretWord)
-        .map((c) => (this.guessedChars.includes(c.toLowerCase()) ? c : "_"))
-        .join(" ");
-    },
-    /**
-     * @returns true, wenn das Spiel vorbei ist, sonst false
-     */
-    isOver() {
-      return this.lost || this.won;
-    },
-  };
+function newGame() {
+  secretWord = randomWord();
+  lives = 5;
+  won = false;
+  lost = false;
+  guessedChars = [];
 }
 
-// neues Spiel anlegen
-let game = newGame(randomWord(), 5);
+/**
+ * @param {string} guess Der Buchstabe, der ausprobiert weden soll.
+ * @returns {string} 'player-won' wenn das Spiel gewonnen wurde,
+ *  'player-lost' wenn das Spiel verloren wurde,
+ *  'character-correct' wenn ein korrekter Buchstabe probiert wurde,
+ *  'character-wrong' wenn ein falscher Buchstabe probiert wurde
+ */
+function makeGuess(guess) {
+  // wenn das Spiel bereits vorbei ist, wird nichts gemacht
+  if (lost || won) {
+    return;
+  }
+
+  // wir arbeiten mit Kleinbuchstaben, damit A==a
+  guess = guess.toLowerCase();
+
+  // Wenn der Buchtstabe bereits ausprobiert ist, passiert nichts
+  if (guessedChars.includes(guess)) {
+    return;
+  }
+
+  // Buchstabe zu den ausprobierten Buchchstaben hinzufügen
+  guessedChars.push(guess);
+
+  // Wenn damit das Wort erraten ist, ist das Spiel gewonnen
+  if (isFullyGuessed()) {
+    won = true;
+    return "player-won";
+  }
+
+  // Falls das Wort den Buchstaben enthalten ist geht es mit dem nächsten Zug weiter
+  if (secretWord.toLowerCase().includes(guess)) {
+    return "character-correct";
+  }
+
+  // ansonsten ein Leben abziehen
+  lives--;
+  // Und wenn keine Leben mehr übrig sind: Verloren!
+  if (lives <= 0) {
+    lost = true;
+    return "player-lost";
+  }
+
+  return "character-wrong";
+}
+/**
+ * @returns true, wenn das Wort erraten ist, sonst false
+ */
+function isFullyGuessed() {
+  for (const c of secretWord.toLowerCase()) {
+    if (!guessedChars.includes(c)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * @returns die anzuzeigende Buchstabenwand
+ */
+function letterWall() {
+  if (lost || won) {
+    return Array.from(secretWord).join(" ");
+  }
+  return Array.from(secretWord)
+    .map((c) => (guessedChars.includes(c.toLowerCase()) ? c : "_"))
+    .join(" ");
+}
 
 /**
  * aktualisiert das "Spielbrett"
  */
 function updateBoard() {
-  letterwallElm.textContent = game.letterWall();
+  letterwallElm.textContent = letterWall();
   livesElm.textContent =
-    game.lives + " Versuch" + (game.lives == 1 ? "" : "e") + " übrig";
+    lives + " Versuch" + (lives == 1 ? "" : "e") + " übrig";
   guessedCharsElm.textContent =
     "Bereits probiert: [ " +
-    game.guessedChars
+    guessedChars
       .sort()
       .map((c) => c.toUpperCase())
-      .join(" ") + " ]";
+      .join(" ") +
+    " ]";
 }
 
 // initial einmal manuell aufrufen, damit alles auf der Seite auftaucht
+newGame();
 updateBoard();
 
 // wenn der Spieler eine Taste drückt, wird ein Spielzug gemachen
 document.onkeydown = (evt) => {
   // falls das Spiel vorbei ist gibt es eine Sonderbehandling für
   // die Enter-Taste damit ein neues Spiel gestartet werden kann
-  if (game.isOver() && evt.key == "Enter") {
-    game = newGame(randomWord(), 5);
-    updateBoard();
-    document.body.classList.remove("won", "lost");
+  if (won || lost) {
+    if (evt.key == "Enter") {
+      newGame();
+      updateBoard();
+      document.body.classList.remove("won", "lost");
+    }
     return;
   }
 
-  // alle Tasten die nicht ein Zeichen lang sind werden ignoriert, z.B. Backspace und so
-  if (evt.key.length != 1) {
+  // wir interessieren uns nur für die Buchstaben A bis Z, ansonsten nehmen wir den Versuch nicht an
+  if (!evt.key.match(/^[a-z]$/i)) {
     return;
   }
 
   // gewählte Taste als Versuch in das Spiel geben
-  game.makeGuess(evt.key);
+  const result = makeGuess(evt.key);
 
   // "Spielbrett" aktualisieren
   updateBoard();
 
+  if (result == "character-wrong") {
+    letterwallElm.classList.add("wrong");
+    setTimeout(() => letterwallElm.classList.remove("wrong"), 250);
+    return;
+  }
+
+  if (result == "character-correct") {
+    letterwallElm.classList.add("correct");
+    setTimeout(() => letterwallElm.classList.remove("correct"), 250);
+    return;
+  }
+
+  // if (result == "character-wrong") {
+  //   letterwallElm.style.animationIterationCount++;
+  //   return;
+  // }
+
   // Spieler hat gewonnen
-  if (game.won) {
+  if (result == "player-won") {
     document.body.classList.add("won");
     announcmentElm.textContent = "Gewonnen! Neustart mit Enter-Taste.";
     return;
   }
 
   // Spieler hat verloren
-  if (game.lost) {
+  if (result == "player-lost") {
     document.body.classList.add("lost");
     announcmentElm.textContent = "Verloren! Neustart mit Enter-Taste.";
     return;
